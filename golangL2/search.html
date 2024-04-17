@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Books</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+        }
+        .books {
+            margin-top: 20px;
+        }
+        .book {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .book h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Search Books</h1>
+        <form id="searchForm">
+            <div>
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" placeholder="Enter title">
+            </div>
+            <div>
+                <label for="author">Author:</label>
+                <input type="text" id="author" name="author" placeholder="Enter author">
+            </div>
+            <div>
+                <label for="publisher">Publisher:</label>
+                <input type="text" id="publisher" name="publisher" placeholder="Enter publisher">
+            </div>
+            <button type="submit">Search</button>
+        </form>
+        <div id="books" class="books"></div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const publisher = document.getElementById('publisher').value;
+
+            fetch('http://localhost:8080/search-book', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: title, author: author, publisher: publisher })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const booksDiv = document.getElementById('books');
+                if (data.books && data.books.length > 0) {
+                    booksDiv.innerHTML = '';
+                    data.books.forEach(book => {
+                        const bookDiv = document.createElement('div');
+                        bookDiv.classList.add('book');
+                        bookDiv.innerHTML = `<h2>${book.title}</h2><p>Author: ${book.authors}</p><p>Publisher: ${book.publisher}</p><p>Version: ${book.version}</p><p>Total Copies: ${book.total_copies}</p><p>Available Copies: ${book.available_copies}</p>`;
+                        booksDiv.appendChild(bookDiv);
+                    });
+                } else {
+                    booksDiv.innerHTML = '<p>No books found matching the search criteria</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const booksDiv = document.getElementById('books');
+                booksDiv.innerHTML = '<p>Error searching for books</p>';
+            });
+        });
+    </script>
+</body>
+</html>
